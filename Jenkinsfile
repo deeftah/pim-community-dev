@@ -1,37 +1,48 @@
 #!groovy
 
+Integer nbSlaveIntegration = 8
+String phpVersion = "7.1"
+String features = "features"
+String launchUnitTests = "yes"
+String launchIntegrationTests = "yes"
+String launchBehatTests = "yes"
+def testFiles = []
+def testFilesEE = []
 def editions = ["ce"]
-def phpVersion = "7.1"
-def features = "features"
-def launchUnitTests = "yes"
-def launchIntegrationTests = "yes"
-def launchBehatTests = "yes"
 
 stage("Checkout") {
     milestone 1
     if (env.BRANCH_NAME =~ /^PR-/) {
-        userInput = input(message: 'Launch tests?', parameters: [
-            choice(choices: 'yes\nno', description: 'Run unit tests and code style checks', name: 'launchUnitTests'),
-            choice(choices: 'yes\nno', description: 'Run integration tests', name: 'launchIntegrationTests'),
-            choice(choices: 'yes\nno', description: 'Run behat tests', name: 'launchBehatTests'),
-            string(defaultValue: 'ee,ce', description: 'PIM edition the behat tests should run on (comma separated values)', name: 'editions'),
-            string(defaultValue: 'features,vendor/akeneo/pim-community-dev/features', description: 'Behat scenarios to build', name: 'features'),
-            choice(choices: '7.1', description: 'PHP version to run behat with', name: 'phpVersion'),
-        ])
+        //userInput = input(message: 'Launch tests?', parameters: [
+        //    choice(choices: 'yes\nno', description: 'Run unit tests and code style checks', name: 'launchUnitTests'),
+        //    choice(choices: 'yes\nno', description: 'Run integration tests', name: 'launchIntegrationTests'),
+        //    choice(choices: 'yes\nno', description: 'Run behat tests', name: 'launchBehatTests'),
+        //    string(defaultValue: 'ee,ce', description: 'PIM edition the behat tests should run on (comma separated values)', name: 'editions'),
+        //    string(defaultValue: 'features,vendor/akeneo/pim-community-dev/features', description: 'Behat scenarios to build', name: 'features'),
+        //    choice(choices: '7.1', description: 'PHP version to run behat with', name: 'phpVersion'),
+        //])
 
-        editions = userInput['editions'].tokenize(',')
-        features = userInput['features']
-        phpVersion = userInput['phpVersion']
-        launchUnitTests = userInput['launchUnitTests']
-        launchIntegrationTests = userInput['launchIntegrationTests']
-        launchBehatTests = userInput['launchBehatTests']
+        //editions = userInput['editions'].tokenize(',')
+        //features = userInput['features']
+        //phpVersion = userInput['phpVersion']
+        //launchUnitTests = userInput['launchUnitTests']
+        //launchIntegrationTests = userInput['launchIntegrationTests']
+        //launchBehatTests = userInput['launchBehatTests']
+        editions = ["ce"]
+        features = "features,vendor/akeneo/pim-community-dev/features"
+        phpVersion = "7.1"
+        launchUnitTests = "no"
+        launchIntegrationTests = "yes"
+        launchBehatTests = "no"
     }
     milestone 2
 
     node {
         deleteDir()
         checkout scm
+
         stash "pim_community_dev"
+        deleteDir()
 
         if (editions.contains('ee') && 'yes' == launchBehatTests) {
            checkout([$class: 'GitSCM',
@@ -66,6 +77,18 @@ stage("Checkout") {
                 stash "pim_community_dev_full"
             }
 
+            unstash "pim_community_dev_full"
+
+            def output = sh (
+                returnStdout: true,
+                script: 'find src -name "*Integration.php" -exec sh -c "grep -Ho \'function test\' {} | uniq -c"  \\; | sed "s/:function test//"'
+            )
+            def files = output.tokenize('\n')
+            for (file in files) {
+                def fileInfo = file.tokenize(' ')
+                testFiles += ["nbTests": fileInfo[0] as Integer , "absolutePath": fileInfo[1]]
+            }
+
             deleteDir()
         }
     }
@@ -73,7 +96,7 @@ stage("Checkout") {
         checkouts['enterprise'] = {
             node('docker') {
                 deleteDir()
-            docker.image("akeneo/php:${phpVersion}").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
+                docker.image("akeneo/php:${phpVersion}").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
                     unstash "pim_enterprise_dev"
 
                     sh "php -d memory_limit=-1 /usr/local/bin/composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist --no-scripts"
@@ -97,6 +120,16 @@ stage("Checkout") {
                     sh "npm run webpack"
 
                     stash "pim_enterprise_dev_full"
+                }
+
+                def output = sh (
+                    returnStdout: true,
+                    script: 'find src vendor/akeneo/pim-community-dev/src -name "*Integration.php" -exec sh -c "grep -Ho \'function test\' {} | uniq -c"  \\; | sed "s/:function test//"'
+                )
+                def files = output.tokenize('\n')
+                for (file in files) {
+                    def fileInfo = file.tokenize(' ')
+                    testFilesEE += ["nbTests": fileInfo[0] as Integer , "absolutePath": fileInfo[1]]
                 }
 
                 deleteDir()
@@ -129,14 +162,34 @@ if (launchIntegrationTests.equals("yes")) {
     stage("Integration tests") {
         def tasks = [:]
 
-        tasks["integration-7.1-akeneo"] = {runIntegrationTest("7.1", "Akeneo_Integration_Test")}
-        tasks["integration-7.1-api-base"] = {runIntegrationTest("7.1", "PIM_Api_Base_Integration_Test")}
-        tasks["integration-7.1-api-controllers"] = {runIntegrationTest("7.1", "PIM_Api_Bundle_Controllers_Integration_Test")}
-        tasks["integration-7.1-api-controllers-catalog"] = {runIntegrationTest("7.1", "PIM_Api_Bundle_Controllers_Catalog_Integration_Test")}
-        tasks["integration-7.1-api-controller-product"] = {runIntegrationTest("7.1", "PIM_Api_Bundle_Controller_Product_Integration_Test")}
-        tasks["integration-7.1-catalog"] = {runIntegrationTest("7.1", "PIM_Catalog_Integration_Test")}
-        tasks["integration-7.1-completeness"] = {runIntegrationTest("7.1", "PIM_Catalog_Completeness_Integration_Test")}
-        tasks["integration-7.1-pqb"] = {runIntegrationTest("7.1", "PIM_Catalog_PQB_Integration_Test")}
+        Integer nbIntegrationTests = 0;
+        for (testFile in testFiles) {
+            nbIntegrationTests += testFile["nbTests"]
+        }
+        Integer nbTestsPerSlave = nbIntegrationTests.intdiv(nbSlaveIntegration) + 1
+
+        def listTestFiles = []
+        Integer nbTests = 0
+        Integer slaveId = 1
+
+        for (testFile in testFiles) {
+            nbTests += testFile["nbTests"]
+            listTestFiles += testFile["absolutePath"]
+
+            if (nbTests > nbTestsPerSlave) {
+                def files = listTestFiles
+                tasks["integration-tests-${slaveId}"] = {runIntegrationTest("7.1", files)}
+
+                listTestFiles = []
+                nbTests = 0
+                slaveId++;
+            }
+        }
+
+        if (nbTests > 0) {
+            def files = listTestFiles
+            tasks["integration-tests-${slaveId}"] = {runIntegrationTest("7.1", files)}
+        }
 
         parallel tasks
     }
@@ -178,9 +231,8 @@ def runPhpUnitTest(phpVersion) {
         deleteDir()
         try {
             docker.image("akeneo/php:${phpVersion}").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
-                unstash "pim_community_dev"
+                unstash "pim_community_dev_full"
 
-                sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
                 sh "mkdir -p app/build/logs/"
 
                 sh "./bin/phpunit -c app/phpunit.xml.dist --testsuite PIM_Unit_Test --log-junit app/build/logs/phpunit.xml"
@@ -198,7 +250,7 @@ def runPhpUnitTest(phpVersion) {
     }
 }
 
-def runIntegrationTest(phpVersion, testSuiteName) {
+def runIntegrationTest(phpVersion, testFiles) {
     node('docker') {
         deleteDir()
         sh "docker stop \$(docker ps -a -q) || true"
@@ -206,11 +258,10 @@ def runIntegrationTest(phpVersion, testSuiteName) {
 
         try {
             docker.image("elasticsearch:5").withRun("--name elasticsearch -e ES_JAVA_OPTS=\"-Xms256m -Xmx256m\"") {
-                docker.image("mysql:5.7").withRun("--name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=akeneo_pim -e MYSQL_PASSWORD=akeneo_pim -e MYSQL_DATABASE=akeneo_pim") {
+                docker.image("mysql:5.7").withRun("--name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=akeneo_pim -e MYSQL_PASSWORD=akeneo_pim -e MYSQL_DATABASE=akeneo_pim --tmpfs=/var/lib/mysql/:rw,noexec,nosuid,size=250m --tmpfs=/tmp/:rw,noexec,nosuid,size=100m") {
                     docker.image("akeneo/php:${phpVersion}").inside("--link mysql:mysql --link elasticsearch:elasticsearch -v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
-                        unstash "pim_community_dev"
+                        unstash "pim_community_dev_full"
 
-                        sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
                         sh "cp app/config/parameters_test.yml.dist app/config/parameters_test.yml"
                         sh "sed -i \"s#database_host: .*#database_host: mysql#g\" app/config/parameters_test.yml"
                         sh "sed -i \"s#index_hosts: .*#index_hosts: 'elasticsearch:9200'#g\" app/config/parameters_test.yml"
@@ -218,7 +269,15 @@ def runIntegrationTest(phpVersion, testSuiteName) {
                         sh "./app/console --env=test pim:install --force"
 
                         sh "mkdir -p app/build/logs/"
-                        sh "./bin/phpunit -c app/phpunit.xml.dist --testsuite ${testSuiteName} --log-junit app/build/logs/phpunit_integration.xml"
+
+                        String testSuiteFiles = ""
+                        for (testFile in testFiles) {
+                            testSuiteFiles += "<file>../${testFile}</file>"
+                        }
+
+                        sh "sed -i \"s#<file></file>#${testSuiteFiles}#\" app/phpunit.xml.dist"
+
+                        sh "./bin/phpunit -c app/phpunit.xml.dist --testsuite PIM_Integration_Test --log-junit app/build/logs/phpunit_integration.xml"
                     }
                 }
             }
@@ -227,7 +286,7 @@ def runIntegrationTest(phpVersion, testSuiteName) {
             sh "docker rm \$(docker ps -a -q) || true"
             sh "docker volume rm \$(docker volume ls -q) || true"
 
-            sh "sed -i \"s/testcase name=\\\"/testcase name=\\\"[integration-${phpVersion}-${testSuiteName}] /\" app/build/logs/*.xml"
+            sh "sed -i \"s/testcase name=\\\"/testcase name=\\\"[integration-${phpVersion}] /\" app/build/logs/*.xml"
             junit "app/build/logs/*.xml"
 
             deleteDir()
@@ -240,9 +299,8 @@ def runPhpSpecTest(phpVersion) {
         deleteDir()
         try {
             docker.image("akeneo/php:${phpVersion}").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
-                unstash "pim_community_dev"
+                unstash "pim_community_dev_full"
 
-                sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
                 sh "mkdir -p app/build/logs/"
 
                 sh "./bin/phpspec run --no-interaction --format=junit > app/build/logs/phpspec.xml"
@@ -265,9 +323,8 @@ def runPhpCsFixerTest() {
         deleteDir()
         try {
             docker.image("akeneo/php:7.1").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
-                unstash "pim_community_dev"
+                unstash "pim_community_dev_full"
 
-                sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
                 sh "mkdir -p app/build/logs/"
 
                 sh "./bin/php-cs-fixer fix --diff --dry-run --format=junit --config=.php_cs.php > app/build/logs/phpcs.xml"
@@ -328,9 +385,8 @@ def runPhpCouplingDetectorTest() {
         deleteDir()
         try {
             docker.image("akeneo/php:7.1").inside("-v /home/akeneo/.composer:/home/docker/.composer -e COMPOSER_HOME=/home/docker/.composer") {
-                unstash "pim_community_dev"
+                unstash "pim_community_dev_full"
 
-                sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
                 sh "./bin/php-coupling-detector detect --config-file=.php_cd.php src"
             }
         } finally {
