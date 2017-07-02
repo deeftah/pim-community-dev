@@ -28,7 +28,7 @@ class ProductSaverIntegration extends TestCase
         $storageValues = $this->getStorageValuesWithAllAttributes();
         NormalizedProductCleaner::cleanOnlyValues($storageValues);
 
-        $this->assertEquals($storageValues, $rawValues);
+        $this->assertSame($storageValues, $rawValues);
     }
 
     /**
@@ -36,10 +36,7 @@ class ProductSaverIntegration extends TestCase
      */
     protected function getConfiguration()
     {
-        return new Configuration(
-            [Configuration::getTechnicalSqlCatalogPath()],
-            false
-        );
+        return new Configuration([Configuration::getTechnicalSqlCatalogPath()]);
     }
 
     /**
