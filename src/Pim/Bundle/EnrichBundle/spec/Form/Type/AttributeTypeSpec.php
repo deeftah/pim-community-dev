@@ -131,7 +131,7 @@ class AttributeTypeSpec extends ObjectBehavior
                 'constraints' => new Valid(),
             ]
         )->shouldBeCalled();
-        $this->setDefaultOptions($resolver);
+        $this->configureOptions($resolver);
     }
 
     function it_adds_attribute_type_related_fields_subscriber_to_the_form($builder, $subscriber)
