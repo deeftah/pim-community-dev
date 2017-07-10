@@ -183,7 +183,7 @@ services:
             - '@pim_internal_api_serializer'
 
     pim_enrich.normalizer.group_violation:
-        class: %pim_enrich.normalizer.variant_group_violation.class%
+        class: '%pim_enrich.normalizer.variant_group_violation.class%'
         arguments:
             - '@pim_internal_api_serializer'
 

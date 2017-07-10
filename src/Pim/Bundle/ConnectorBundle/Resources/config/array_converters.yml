@@ -296,7 +296,7 @@ services:
         class: '%pim_connector.array_converter.flat_to_standard.product.value_converter.registry.class%'
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.registry:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.registry.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.registry.class%'
 
     pim_connector.array_converter.flat_to_standard.product.value_converter.abstract:
         class: '%pim_connector.array_converter.flat_to_standard.product.value_converter.abstract.class%'
@@ -312,7 +312,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.price:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.price.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.price.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_price_collection']
@@ -328,7 +328,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.metric:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.metric.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.metric.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_metric']
@@ -344,7 +344,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.multiselect:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.multiselect.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.multiselect.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_multiselect', 'pim_reference_data_multiselect']
@@ -360,7 +360,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.simpleselect:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.simpleselect.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.simpleselect.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_simpleselect', 'pim_reference_data_simpleselect']
@@ -376,7 +376,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.text:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.text.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.text.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_identifier', 'pim_catalog_text', 'pim_catalog_textarea', 'pim_catalog_number']
@@ -408,7 +408,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.media:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.media.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.media.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_image', 'pim_catalog_file']
@@ -432,7 +432,7 @@ services:
             - { name: 'pim_connector.array_converter.flat_to_standard.product.value_converter' }
 
     pim_connector.array_converter.standard_to_flat.product.value_converter.date:
-        class: %pim_connector.array_converter.standard_to_flat.product.value_converter.date.class%
+        class: '%pim_connector.array_converter.standard_to_flat.product.value_converter.date.class%'
         arguments:
             - '@pim_connector.array_converter.flat_to_standard.product.attribute_columns_resolver'
             - ['pim_catalog_date']

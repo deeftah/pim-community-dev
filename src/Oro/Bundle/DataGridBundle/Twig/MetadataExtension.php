@@ -4,7 +4,6 @@ namespace Oro\Bundle\DataGridBundle\Twig;
 
 use Oro\Bundle\DataGridBundle\Datagrid\Manager;
 use Oro\Bundle\DataGridBundle\Datagrid\RequestParameters;
-use Oro\Bundle\DataGridBundle\Extension\Action\ActionExtension;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Twig_Extension;
@@ -64,7 +63,7 @@ class MetadataExtension extends Twig_Extension
      */
     public function getGridData(\Twig_Environment $twig, $name, $params = [])
     {
-        return $twig->getExtension(ActionExtension::class)->renderUri($this->generateUrl($name, $params, true));
+        return $this->container->get('fragment.handler')->render($this->generateUrl($name, $params, true));
     }
 
     /**

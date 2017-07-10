@@ -65,7 +65,7 @@
         "symfony/monolog-bundle": "2.12.1",
         "symfony/swiftmailer-bundle": "2.4.2",
         "symfony/security-acl": "3.0.0",
-        "symfony/symfony": "~3.2.0",
+        "symfony/symfony": "3.2.9",
         "twig/extensions": "1.2.0",
         "box/spout": "2.5.0"
     },

@@ -6,7 +6,7 @@ parameters:
 services:
     # Subscribers
     pim_enrich.form.subscriber.attribute:
-        class: %pim_enrich.form.subscriber.add_attribute_type.class%
+        class: '%pim_enrich.form.subscriber.add_attribute_type.class%'
         arguments:
             - '@pim_catalog.registry.attribute_type'
             - '@oro_security.security_facade'
