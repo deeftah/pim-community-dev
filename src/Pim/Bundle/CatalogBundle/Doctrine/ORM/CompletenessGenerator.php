@@ -128,22 +128,47 @@ class CompletenessGenerator implements CompletenessGeneratorInterface
         $cleanupStmt = $this->connection->prepare($cleanupSql);
         $cleanupStmt->execute();
 
+        // Create temporary table
+        $createSQL = 'CREATE TEMPORARY TABLE ' .
+            self::COMPLETE_PRICES_TABLE .
+            ' (locale_id int, channel_id int, value_id int, primary key(locale_id, channel_id, value_id)) ';
+        $createSQL = $this->applyTableNames($createSQL);
+        $tempTableStmt = $this->connection->prepare($createSQL);
+        $tempTableStmt->execute();
+
+        // Execute the SELECT
         $sql = $this->getCompletePricesSQL();
         $sql = $this->applyCriteria($sql, $criteria);
-
-        $sql = 'CREATE TEMPORARY TABLE ' .
-            self::COMPLETE_PRICES_TABLE .
-            ' (locale_id int, channel_id int, value_id int, primary key(locale_id, channel_id, value_id)) ' .
-            $sql;
-
         $sql = $this->applyTableNames($sql);
 
-        $stmt = $this->connection->prepare($sql);
-
+        $fetchStmt = $this->connection->prepare($sql);
         foreach ($criteria as $placeholder => $value) {
-            $stmt->bindValue($placeholder, $value);
+            $fetchStmt->bindValue($placeholder, $value);
         }
-        $stmt->execute();
+        $fetchStmt->execute();
+
+        // Fill in temporary table
+        $this->connection->beginTransaction();
+        try{
+            while($completeness = $fetchStmt->fetch()) {
+                $insertSQL = sprintf(
+                    'INSERT INTO %s (locale_id, channel_id, value_id) VALUES (%s, %s, %s)',
+                    self::COMPLETE_PRICES_TABLE,
+                    $completeness['locale_id'],
+                    $completeness['channel_id'],
+                    $completeness['value_id']
+                );
+
+                $insertStmt = $this->connection->prepare($insertSQL);
+                $insertStmt->execute();
+            }
+            $this->connection->commit();
+        } catch (\Exception $e) {
+            $this->connection->rollBack();
+            throw $e;
+        }
+
+//        echo memory_get_peak_usage(true) / 1000000 . 'Mo';
     }
 
     /**
