@@ -131,7 +131,7 @@ class AddAttributeTypeRelatedFieldsSubscriber implements EventSubscriberInterfac
 
         // replace by disabled and read-only
         $options['disabled'] = true;
-        $options['read_only'] = true;
+        $options['attr']['read_only'] = true;
         $options['auto_initialize'] = false;
         $formField = $this->factory->createNamed($name, $type, null, $options);
         $form->add($formField);
@@ -160,8 +160,8 @@ class AddAttributeTypeRelatedFieldsSubscriber implements EventSubscriberInterfac
             'choices'   => [$group],
             'required'  => true,
             'multiple'  => false,
-            'read_only' => true,
             'attr'      => [
+                'read_only' => true,
                 'class' => 'hide'
             ]
         ];

@@ -72,7 +72,9 @@ class AttributeTypeSpec extends ObjectBehavior
                     'choices'   => ['text' => 'text', 'number' => 'number', 'email' => 'email'],
                     'select2'   => true,
                     'disabled'  => false,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true,
+                    ],
                 ]
             )
             ->shouldHaveBeenCalled();

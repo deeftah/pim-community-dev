@@ -129,7 +129,9 @@ class AttributeType extends AbstractType
                 'choices'   => $this->registry->getSortedAliases(),
                 'select2'   => true,
                 'disabled'  => false,
-                'read_only' => true
+                'attr'      => [
+                    'read_only' => true,
+                ],
             ]
         );
     }
@@ -171,7 +173,7 @@ class AttributeType extends AbstractType
                 },
                 'required'      => true,
                 'multiple'      => false,
-                'empty_value'   => 'Choose the attribute group',
+                'placeholder'   => 'Choose the attribute group',
                 'select2'       => true
             ]
         );

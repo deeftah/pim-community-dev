@@ -59,7 +59,7 @@ class AttributeNormalizerSpec extends ObjectBehavior
                 'code'                => 'price',
                 'id'                  => 12,
                 'wysiwyg_enabled'     => false,
-                'empty_value'         => [],
+                'placeholder'         => [],
                 'field_type'          => 'akeneo-text-field',
                 'filter_types'        => ['product-export-builder' => 'akeneo-attribute-string-filter'],
                 'is_locale_specific'  => 0,

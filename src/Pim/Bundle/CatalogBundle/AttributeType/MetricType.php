@@ -49,7 +49,9 @@ class MetricType extends AbstractAttributeType
                 'options' => [
                     'required'  => true,
                     'disabled'  => (bool) $attribute->getId(),
-                    'read_only' => (bool) $attribute->getId()
+                    'attr'      => [
+                        'read_only' => (bool) $attribute->getId(),
+                    ],
                 ]
             ],
             'defaultMetricUnit' => [

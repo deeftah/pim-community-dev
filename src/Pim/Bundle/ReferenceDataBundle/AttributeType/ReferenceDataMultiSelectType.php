@@ -56,7 +56,7 @@ class ReferenceDataMultiSelectType extends AbstractAttributeType
                     'choices'     => $this->getReferenceDataTypeChoices(),
                     'required'    => true,
                     'multiple'    => false,
-                    'empty_value' => 'pim_enrich.reference_data.empty_value.reference_data_type.label',
+                    'placeholder' => 'pim_enrich.reference_data.empty_value.reference_data_type.label',
                     'select2'     => true
                 ],
             ]

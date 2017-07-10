@@ -128,7 +128,9 @@ abstract class AbstractAttributeType implements AttributeTypeInterface
                 'fieldType' => SwitchType::class,
                 'options'   => [
                     'disabled'  => (bool) $attribute->getId(),
-                    'read_only' => (bool) $attribute->getId()
+                    'attr'      => [
+                        'read_only' => (bool) $attribute->getId(),
+                    ]
                 ]
             ],
             'availableLocales' => [
@@ -140,7 +142,9 @@ abstract class AbstractAttributeType implements AttributeTypeInterface
                 'fieldType' => SwitchType::class,
                 'options'   => [
                     'disabled'  => (bool) $attribute->getId(),
-                    'read_only' => (bool) $attribute->getId()
+                    'attr'      => [
+                        'read_only' => (bool) $attribute->getId(),
+                    ]
                 ]
             ],
             'unique' => [
@@ -148,7 +152,9 @@ abstract class AbstractAttributeType implements AttributeTypeInterface
                 'fieldType' => SwitchType::class,
                 'options'   => [
                     'disabled'  => true,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true
+                    ]
                 ]
             ]
         ];

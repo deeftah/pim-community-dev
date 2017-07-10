@@ -47,7 +47,9 @@ class IdentifierType extends AbstractAttributeType
                 'options'   => [
                     'data'      => false,
                     'disabled'  => true,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true,
+                    ]
                 ]
             ],
             'unique' => [
@@ -56,7 +58,9 @@ class IdentifierType extends AbstractAttributeType
                 'options'   => [
                     'data'      => true,
                     'disabled'  => true,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true
+                    ]
                 ]
             ],
             'required' => [
@@ -65,7 +69,9 @@ class IdentifierType extends AbstractAttributeType
                 'options'   => [
                     'data'      => true,
                     'disabled'  => true,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true
+                    ]
                 ]
             ],
             'useableAsGridFilter' => [
@@ -74,7 +80,9 @@ class IdentifierType extends AbstractAttributeType
                 'options'   => [
                     'data'      => true,
                     'disabled'  => true,
-                    'read_only' => true
+                    'attr'      => [
+                        'read_only' => true
+                    ]
                 ]
             ]
         ];
