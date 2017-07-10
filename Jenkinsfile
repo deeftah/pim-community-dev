@@ -51,8 +51,8 @@ stage("Checkout") {
                 unstash "pim_community_dev"
 
                 sh "composer update --optimize-autoloader --no-interaction --no-progress --prefer-dist"
-                sh "app/console assets:install"
-                sh "app/console pim:installer:dump-require-paths"
+                sh "bin/console assets:install"
+                sh "bin/console pim:installer:dump-require-paths"
 
                 stash "pim_community_dev_full"
             }
@@ -84,8 +84,8 @@ stage("Checkout") {
                         sh "php -d memory_limit=-1 /usr/local/bin/composer run-script post-update-cmd"
                     }
 
-                    sh "app/console assets:install"
-                    sh "app/console pim:installer:dump-require-paths"
+                    sh "bin/console assets:install"
+                    sh "bin/console pim:installer:dump-require-paths"
 
                     stash "pim_enterprise_dev_full"
                 }
@@ -215,7 +215,7 @@ def runIntegrationTest(phpVersion, testSuiteName) {
                         sh "sed -i \"s#database_host: .*#database_host: mysql#g\" app/config/parameters_test.yml"
                         sh "sed -i \"s#index_hosts: .*#index_hosts: 'elasticsearch:9200'#g\" app/config/parameters_test.yml"
 
-                        sh "./app/console --env=test pim:install --force"
+                        sh "./bin/console --env=test pim:install --force"
 
                         sh "mkdir -p app/build/logs/"
                         sh "./bin/phpunit -c app/phpunit.xml.dist --testsuite ${testSuiteName} --log-junit app/build/logs/phpunit_integration.xml"
@@ -298,6 +298,10 @@ def runBehatTest(edition, features, phpVersion) {
             }
 
             // Configure the PIM
+            dir("app") {
+                sh "ln -s ./../bin/console"
+            }
+
             sh "cp app/config/parameters.yml.dist app/config/parameters_test.yml"
             sh "sed -i \"s#database_host: .*#database_host: mysql#g\" app/config/parameters_test.yml"
             sh "sed -i \"s#index_hosts: .*#index_hosts: 'elasticsearch: 9200'#g\" app/config/parameters_test.yml"
